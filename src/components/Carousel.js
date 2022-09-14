@@ -5,28 +5,98 @@ import ImageCarousel from "./ImageCarousel";
 import "./Carousel.css";
 
 
-const len = ImageCarousel.length - 1;
 
-function Slider(props) {
-  const [activeIndex, setActiveIndex] = useState(0);
+const Carousel = (props) => {
+  const len = ImageCarousel.length - 1;
+
+  const [activeIndex, setactiveIndex] = useState(0)
+  const [touchPosition, setTouchPosition] = useState(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveIndex(activeIndex === len ? 0 : activeIndex + 1);
-    }, 2000);
+      setactiveIndex(activeIndex === len ? 0 : activeIndex + 1);
+    }, 5000);
     return () => clearInterval(interval);
   }, [activeIndex]);
 
+  const next = () => {
+    if (activeIndex < len) {
+      setactiveIndex((prevState) => prevState + 1);
+    }
+  };
+
+  const prev = () => {
+    if (activeIndex > 0) {
+      setactiveIndex((prevState) => prevState - 1);
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    const touchDown = e.touches[0].clientX;
+    setTouchPosition(touchDown);
+  };
+
+  const handleTouchMove = (e) => {
+    const touchDown = touchPosition;
+
+    if (touchDown === null) {
+      return;
+    }
+
+    const currentTouch = e.touches[0].clientX;
+    const diff = touchDown - currentTouch;
+
+    if (diff > 5) {
+      next();
+    }
+
+    if (diff < -5) {
+      prev();
+    }
+
+    setTouchPosition(null);
+  };
+
   return (
-    <div className="carousel-container">
-      <CarouselInput activeIndex={activeIndex} ImageCarousel={ImageCarousel} />
+    <div className=" carousel-container ">
+      <div className="carousel-wrapper">
+        
+        {activeIndex > 0 && (
+          <button onClick={prev} className="left-arrow">
+            &lt;
+          </button>
+        )}
+        <div
+          className="carousel-content-wrapper"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+        >
+          <div className="carousel-content"
+            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+          >
+          
+          </div>
+        </div>
+        
+        {activeIndex < len && (
+          <button onClick={next} className="right-arrow">
+            &gt;
+          </button>
+        )}
+      </div>
+      <CarouselInput
+        activeIndex={activeIndex}
+        ImageCarousel={ImageCarousel}
+      />
+
       <Dots
         activeIndex={activeIndex}
         ImageCarousel={ImageCarousel}
-        onclick={(activeIndex) => setActiveIndex(activeIndex)}
+        onclick={(activeIndex) => setactiveIndex(activeIndex)}
       />
     </div>
   );
-}
+};
 
-export default Slider;
+export default Carousel;
+
